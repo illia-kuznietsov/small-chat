@@ -20,7 +20,7 @@ let SmallTalk = {
             let chatBox = document.querySelector('#chat-box')
             let msgBlock = document.createElement('p')
 
-            msgBlock.insertAdjacentHTML('beforeend', `message: ${payload.body}`)
+            msgBlock.insertAdjacentHTML('beforeend', `new message: ${payload.body}`)
             chatBox.appendChild(msgBlock)
         })
     }
