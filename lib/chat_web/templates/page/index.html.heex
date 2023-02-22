@@ -4,7 +4,7 @@
 
 <div id="chat-box">
     <%= for message <- @messages do%>
-        <p><%= message %></p>
+        <p><%= message.username <> " : " <> message.message %></p>
     <% end %>
 </div>
 
