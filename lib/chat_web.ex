@@ -38,6 +38,7 @@ defmodule ChatWeb do
         only: [get_flash: 1, get_flash: 2, view_module: 1, view_template: 1]
 
       # Include shared imports and aliases for views
+      import Phoenix.Component
       unquote(view_helpers())
     end
   end
@@ -45,7 +46,7 @@ defmodule ChatWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {ChatWeb.LayoutView, "live.html"}
+        layout: {ChatWeb.LayoutView, :live}
 
       unquote(view_helpers())
     end

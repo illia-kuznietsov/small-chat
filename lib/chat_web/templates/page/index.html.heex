@@ -1,10 +1,10 @@
 <section class="phx-hero">
-  <h1><%= gettext "Welcome to %{name}!", name: "Chat" %></h1>
+  <h1><%= gettext "Welcome to the Chat, %{name}!", name: "Pokemon" %></h1>
 </section>
 
 <div id="chat-box">
     <%= for message <- @messages do%>
-        <p><%= message.username <> " : " <> message.message %></p>
+        <p><%= message.username %>  :  <%= message.message %></p>
     <% end %>
 </div>
 

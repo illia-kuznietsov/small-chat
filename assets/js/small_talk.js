@@ -10,8 +10,7 @@ let SmallTalk = {
             e.preventDefault()
 
             let userMsg = document.getElementById('user-msg').value
-
-            channel.push('shout', {body: userMsg, nickname: 1234})
+            channel.push('shout', {body: userMsg})
 
             document.getElementById('user-msg').value = ''
         })
@@ -20,7 +19,7 @@ let SmallTalk = {
             let chatBox = document.querySelector('#chat-box')
             let msgBlock = document.createElement('p')
 
-            msgBlock.insertAdjacentHTML('beforeend', `${assigns[:username]} : ${payload.body}`)
+            msgBlock.insertAdjacentHTML('beforeend', `${payload.nickname} : ${payload.message}`)
             chatBox.appendChild(msgBlock)
         })
     }

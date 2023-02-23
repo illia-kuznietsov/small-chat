@@ -32,10 +32,14 @@ defmodule ChatWeb.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def generate_username() do
 
-    adjective = File.stream!(Application.app_dir(:chat, "/priv/static/username_generation/adjectives.txt")) |> Enum.map(&String.trim/1) |> Enum.random()
-    animal = File.stream!(Application.app_dir(:chat, "/priv/static/username_generation/animals.txt")) |> Enum.map(&String.trim/1) |> Enum.random()
+  def load_pick_random(path) do
+    File.stream!(Application.app_dir(:chat, path)) |> Enum.map(&String.trim/1) |> Enum.random()
+  end
+  def generate_username() do
+    adjectives_and_animals = ["/priv/static/username_generation/adjectives.txt",
+      "/priv/static/username_generation/animals.txt"]
+    [adjective, animal] = Enum.map(adjectives_and_animals, &load_pick_random/1)
     "#{adjective} #{animal}"
   end
   @impl true
