@@ -32,9 +32,20 @@ defmodule ChatWeb.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
+
+  def load_pick_random(path) do
+    File.stream!(Application.app_dir(:chat, path)) |> Enum.map(&String.trim/1) |> Enum.random()
+  end
+  def generate_username() do
+    adjectives_and_animals = ["/priv/static/username_generation/adjectives.txt",
+      "/priv/static/username_generation/animals.txt"]
+    [adjective, animal] = Enum.map(adjectives_and_animals, &load_pick_random/1)
+    "#{adjective} #{animal}"
+  end
   @impl true
   def connect(_params, socket, _connect_info) do
-    {:ok, socket}
+    username = generate_username()
+    {:ok, assign(socket, :username, username)}
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:
