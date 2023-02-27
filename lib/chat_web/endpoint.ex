@@ -7,13 +7,11 @@ defmodule ChatWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_chat_key",
-    signing_salt: "lQUTuiN6"
+    signing_salt: "gISLeXCA",
+    same_site: "Lax"
   ]
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
-  socket "/socket", ChatWeb.UserSocket,
-         websocket: true,
-         longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.
   #
@@ -23,7 +21,7 @@ defmodule ChatWeb.Endpoint do
     at: "/",
     from: :chat,
     gzip: false,
-    only: ~w(assets fonts images favicon.ico robots.txt)
+    only: ChatWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
