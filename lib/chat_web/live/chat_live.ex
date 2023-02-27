@@ -12,13 +12,14 @@ defmodule ChatWeb.ChatLive do
     "#{adjective} #{animal}"
   end
   def mount(_params, _session, socket) do
+    Phoenix.PubSub.subscribe(Chat.PubSub,"chat")
     socket = assign(socket, username: generate_username())
     socket = assign(socket, messages: get_message_storage)
     IO.inspect(socket)
     {:ok, socket}
   end
   defp get_message_storage(), do: Agent.get(MessageStorage, fn list -> list |> Enum.reverse end)
-
+  defp broadcast_updated_messages(), do: Phoenix.PubSub.broadcast(Chat.PubSub, "chat", {:chat_update, "whatever"})
   def render(assigns) do
     ~H"""
       <section class="phx-hero">
@@ -48,13 +49,16 @@ defmodule ChatWeb.ChatLive do
     Agent.update(MessageStorage, fn list ->
       [%{username: username, message: message, likes: [], time_stamp: time_stamp, id: id} | list] end)
     socket = assign(socket, :messages, get_message_storage)
+    broadcast_updated_messages()
     {:noreply, socket}
   end
+
 
   def handle_event("like", params, socket) do
     IO.inspect(socket.assigns.messages)
     Agent.update(MessageStorage, fn list -> find_and_update_likes(list, params["id"], socket.assigns.username) end)
     socket = assign(socket, :messages, get_message_storage)
+    broadcast_updated_messages()
     {:noreply, socket}
   end
 
@@ -75,5 +79,10 @@ defmodule ChatWeb.ChatLive do
         [username | v]
       end
     end))
+  end
+  
+  def handle_info({:chat_update, _}, socket) do
+    socket = assign(socket, :messages, get_message_storage)
+    {:noreply, socket}
   end
 end
