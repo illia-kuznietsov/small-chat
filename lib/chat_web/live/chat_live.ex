@@ -14,7 +14,7 @@ defmodule ChatWeb.ChatLive do
   def mount(_params, _session, socket) do
     Phoenix.PubSub.subscribe(Chat.PubSub,"chat")
     socket = assign(socket, username: generate_username())
-    socket = assign(socket, messages: get_message_storage)
+    socket = assign(socket, messages: get_message_storage())
     IO.inspect(socket)
     {:ok, socket}
   end
@@ -48,7 +48,6 @@ defmodule ChatWeb.ChatLive do
     id = generate_id(username, message, time_stamp)
     Agent.update(MessageStorage, fn list ->
       [%{username: username, message: message, likes: [], time_stamp: time_stamp, id: id} | list] end)
-    socket = assign(socket, :messages, get_message_storage)
     broadcast_updated_messages()
     {:noreply, socket}
   end
@@ -57,7 +56,7 @@ defmodule ChatWeb.ChatLive do
   def handle_event("like", params, socket) do
     IO.inspect(socket.assigns.messages)
     Agent.update(MessageStorage, fn list -> find_and_update_likes(list, params["id"], socket.assigns.username) end)
-    socket = assign(socket, :messages, get_message_storage)
+
     broadcast_updated_messages()
     {:noreply, socket}
   end
@@ -80,9 +79,9 @@ defmodule ChatWeb.ChatLive do
       end
     end))
   end
-  
+
   def handle_info({:chat_update, _}, socket) do
-    socket = assign(socket, :messages, get_message_storage)
+    socket = assign(socket, :messages, get_message_storage())
     {:noreply, socket}
   end
 end
