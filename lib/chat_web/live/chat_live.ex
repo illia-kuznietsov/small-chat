@@ -15,21 +15,30 @@ defmodule ChatWeb.ChatLive do
     Phoenix.PubSub.subscribe(Chat.PubSub,"chat")
     socket = assign(socket, username: generate_username())
     socket = assign(socket, messages: get_message_storage())
-    IO.inspect(socket)
+    socket = assign(socket, checked: false)
+    socket = assign(socket, text: "")
     {:ok, socket}
   end
   defp get_message_storage(), do: Agent.get(MessageStorage, fn list -> list |> Enum.reverse end)
   defp broadcast_updated_messages(), do: Phoenix.PubSub.broadcast(Chat.PubSub, "chat", {:chat_update, "whatever"})
   def render(assigns) do
+    filtered = assigns.messages
+    case assigns.text do
+      "" -> filtered = get_message_storage()
+      filter -> filtered = Enum.filter(filtered, fn message -> message.message =~ filter end)
+    end
+    if assigns.checked do
+      filtered = Enum.filter(filtered, fn message -> length(message.likes) > 0 end)
+    end
     ~H"""
       <section class="phx-hero">
         <h1><%= gettext "Welcome to the Chat, %{name}!", name: @username %></h1>
       </section>
 
       <div id="chat-box">
-        <%= for message <- @messages do%>
-            <p><%= message.username %>  :  <%= message.message %></p>
-            <button phx-click="like" phx-value-id={message.id} title={message.likes}><%= length(message.likes) %></button>
+        <%= for message <- filtered do%>
+          <p><%= message.username %>  :  <%= message.message %></p>
+          <button phx-click="like" phx-value-id={message.id} title={Enum.join(message.likes, ", ")}><%= length(message.likes) %></button>
         <% end %>
       </div>
 
@@ -37,6 +46,10 @@ defmodule ChatWeb.ChatLive do
       <input type="text" placeholder="Your message" name="message" />
       <button>Send</button>
     </form>
+    <form phx-change="filter">
+      <input type="text" placeholder="search message here..." name="filter-message" />
+    </form>
+    <input type="checkbox" phx-click="toggle" checked={@checked}/>
     """
   end
 
@@ -54,11 +67,18 @@ defmodule ChatWeb.ChatLive do
 
 
   def handle_event("like", params, socket) do
-    IO.inspect(socket.assigns.messages)
     Agent.update(MessageStorage, fn list -> find_and_update_likes(list, params["id"], socket.assigns.username) end)
 
     broadcast_updated_messages()
     {:noreply, socket}
+  end
+
+  def handle_event("filter", params, socket) do
+    {:noreply, assign(socket, text: params["filter-message"])}
+  end
+
+  def handle_event("toggle", _params, socket) do
+    {:noreply, assign(socket, checked: !socket.assigns.checked)}
   end
 
   defp generate_id(username, message, time_stamp) do

@@ -48,6 +48,7 @@
       <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/nimble_pool" />
       <excludeFolder url="file://$MODULE_DIR$/_build/dev/lib/finch" />
     </content>
+    <orderEntry type="jdk" jdkName="Elixir 1.14.3-otp-25" jdkType="Elixir SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="phoenix" level="project" />
     <orderEntry type="library" name="phoenix_html" level="project" />

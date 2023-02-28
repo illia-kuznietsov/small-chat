@@ -21,6 +21,7 @@ defmodule ChatWeb.Router do
 
     live "/light", LightLive
     live "/chat", ChatLive
+    live "/trinary", TrinaryLive
   end
 
   # Other scopes may use custom stacks.
