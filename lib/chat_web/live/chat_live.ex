@@ -16,27 +16,19 @@ defmodule ChatWeb.ChatLive do
     socket = assign(socket, username: generate_username())
     socket = assign(socket, messages: get_message_storage())
     socket = assign(socket, checked: false)
-    socket = assign(socket, text: "")
+    socket = assign(socket, filter: "")
     {:ok, socket}
   end
   defp get_message_storage(), do: Agent.get(MessageStorage, fn list -> list |> Enum.reverse end)
   defp broadcast_updated_messages(), do: Phoenix.PubSub.broadcast(Chat.PubSub, "chat", {:chat_update, "whatever"})
   def render(assigns) do
-    filtered = assigns.messages
-    case assigns.text do
-      "" -> filtered = get_message_storage()
-      filter -> filtered = Enum.filter(filtered, fn message -> message.message =~ filter end)
-    end
-    if assigns.checked do
-      filtered = Enum.filter(filtered, fn message -> length(message.likes) > 0 end)
-    end
     ~H"""
       <section class="phx-hero">
         <h1><%= gettext "Welcome to the Chat, %{name}!", name: @username %></h1>
       </section>
 
       <div id="chat-box">
-        <%= for message <- filtered do%>
+        <%= for message <- @messages do%>
           <p><%= message.username %>  :  <%= message.message %></p>
           <button phx-click="like" phx-value-id={message.id} title={Enum.join(message.likes, ", ")}><%= length(message.likes) %></button>
         <% end %>
@@ -47,9 +39,9 @@ defmodule ChatWeb.ChatLive do
       <button>Send</button>
     </form>
     <form phx-change="filter">
-      <input type="text" placeholder="search message here..." name="filter-message" />
+      <input type="text" placeholder="search message here..." name="filter-text" value={@filter}/>
+      <input type="checkbox" name="toggle" checked={@checked}/>
     </form>
-    <input type="checkbox" phx-click="toggle" checked={@checked}/>
     """
   end
 
@@ -74,11 +66,18 @@ defmodule ChatWeb.ChatLive do
   end
 
   def handle_event("filter", params, socket) do
-    {:noreply, assign(socket, text: params["filter-message"])}
+    case params["toggle"] do
+      "on" -> {:noreply, assign(socket, filter: params["filter-text"], checked: true,
+        messages: Enum.filter(filtrate_on_text(params["filter-text"]), fn message -> length(message.likes) > 0 end))}
+      nil -> {:noreply, assign(socket, filter: params["filter-text"], checked: false, messages: filtrate_on_text(params["filter-text"]))}
+    end
   end
 
-  def handle_event("toggle", _params, socket) do
-    {:noreply, assign(socket, checked: !socket.assigns.checked)}
+  defp filtrate_on_text(text) do
+    case text do
+      "" -> get_message_storage()
+      filter -> Enum.filter(get_message_storage(), fn message -> message.message =~ filter end)
+    end
   end
 
   defp generate_id(username, message, time_stamp) do
