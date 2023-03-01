@@ -19,7 +19,6 @@ defmodule ChatWeb.Router do
 
     get "/", PageController, :home
 
-    live "/light", LightLive
     live "/chat", ChatLive
     live "/trinary", TrinaryLive
   end

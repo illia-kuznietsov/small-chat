@@ -1,16 +1,9 @@
 defmodule ChatWeb.ChatLive do
   use ChatWeb, :live_view
   use Phoenix.Component
+  import ChatWeb.Username
+  import ChatWeb.Storage
 
-  defp load_pick_random(path) do
-    File.stream!(Application.app_dir(:chat, path)) |> Enum.map(&String.trim/1) |> Enum.random()
-  end
-  defp generate_username() do
-    adjectives_and_animals = ["/priv/static/username_generation/adjectives.txt",
-      "/priv/static/username_generation/animals.txt"]
-    [adjective, animal] = Enum.map(adjectives_and_animals, &load_pick_random/1)
-    "#{adjective} #{animal}"
-  end
   def mount(_params, _session, socket) do
     Phoenix.PubSub.subscribe(Chat.PubSub,"chat")
     socket = assign(socket, username: generate_username())
@@ -19,7 +12,8 @@ defmodule ChatWeb.ChatLive do
     socket = assign(socket, filter: "")
     {:ok, socket}
   end
-  defp get_message_storage(), do: Agent.get(MessageStorage, fn list -> list |> Enum.reverse end)
+
+
   defp broadcast_updated_messages(), do: Phoenix.PubSub.broadcast(Chat.PubSub, "chat", {:chat_update, "whatever"})
   def render(assigns) do
     ~H"""
@@ -47,20 +41,18 @@ defmodule ChatWeb.ChatLive do
 
 
   def handle_event("send", params, socket) do
-    time_stamp = get_time()
+    time_stamp = Calendar.strftime(DateTime.utc_now(), "%A %d-%m-%Y %H:%M:%S")
     username = socket.assigns.username
     message = params["message"]
-    id = generate_id(username, message, time_stamp)
-    Agent.update(MessageStorage, fn list ->
-      [%{username: username, message: message, likes: [], time_stamp: time_stamp, id: id} | list] end)
+    id = UUID.uuid4()
+    post_message(username, message, time_stamp, id)
     broadcast_updated_messages()
     {:noreply, socket}
   end
 
 
   def handle_event("like", params, socket) do
-    Agent.update(MessageStorage, fn list -> find_and_update_likes(list, params["id"], socket.assigns.username) end)
-
+    update_message_likes(params, socket.assigns.username)
     broadcast_updated_messages()
     {:noreply, socket}
   end
@@ -80,27 +72,9 @@ defmodule ChatWeb.ChatLive do
     end
   end
 
-  defp generate_id(username, message, time_stamp) do
-    Base.encode16(:erlang.md5(username <> time_stamp <> String.slice(message, 0..32)))
-  end
-
-  defp get_time() do
-    d = DateTime.utc_now()
-    "#{d.year}/#{d.month}/#{d.day}-#{d.hour}:#{d.minute}:#{d.second}"
-  end
-
-  defp find_and_update_likes(list, id, username) do
-    update_in(list, [Access.filter(&match?(%{id: ^id}, &1))], &Map.replace_lazy(&1, :likes, fn v ->
-      if Enum.member?(v, username) do
-        v -- [username]
-      else
-        [username | v]
-      end
-    end))
-  end
-
   def handle_info({:chat_update, _}, socket) do
     socket = assign(socket, :messages, get_message_storage())
     {:noreply, socket}
   end
+
 end
