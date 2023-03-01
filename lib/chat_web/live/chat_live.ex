@@ -13,8 +13,6 @@ defmodule ChatWeb.ChatLive do
     {:ok, socket}
   end
 
-
-  defp broadcast_updated_messages(), do: Phoenix.PubSub.broadcast(Chat.PubSub, "chat", {:chat_update, "whatever"})
   def render(assigns) do
     ~H"""
       <section class="phx-hero">
@@ -24,7 +22,7 @@ defmodule ChatWeb.ChatLive do
       <div id="chat-box">
         <%= for message <- @messages do%>
           <p><%= message.username %>  :  <%= message.message %></p>
-          <button phx-click="like" phx-value-id={message.id} title={Enum.join(message.likes, ", ")}><%= length(message.likes) %></button>
+          <button phx-click="like" phx-value-id={message.id} title={message.likes}><%= length(message.likes) %></button>
         <% end %>
       </div>
 
@@ -39,7 +37,6 @@ defmodule ChatWeb.ChatLive do
     """
   end
 
-
   def handle_event("send", params, socket) do
     time_stamp = Calendar.strftime(DateTime.utc_now(), "%A %d-%m-%Y %H:%M:%S")
     username = socket.assigns.username
@@ -49,7 +46,6 @@ defmodule ChatWeb.ChatLive do
     broadcast_updated_messages()
     {:noreply, socket}
   end
-
 
   def handle_event("like", params, socket) do
     update_message_likes(params, socket.assigns.username)
@@ -65,6 +61,11 @@ defmodule ChatWeb.ChatLive do
     end
   end
 
+  def handle_info({:chat_update, _}, socket) do
+    socket = assign(socket, :messages, get_message_storage())
+    {:noreply, socket}
+  end
+
   defp filtrate_on_text(text) do
     case text do
       "" -> get_message_storage()
@@ -72,9 +73,6 @@ defmodule ChatWeb.ChatLive do
     end
   end
 
-  def handle_info({:chat_update, _}, socket) do
-    socket = assign(socket, :messages, get_message_storage())
-    {:noreply, socket}
-  end
+  defp broadcast_updated_messages(), do: Phoenix.PubSub.broadcast(Chat.PubSub, "chat", {:chat_update, "whatever"})
 
 end
