@@ -4,8 +4,9 @@ defmodule ChatWeb.ChatLive do
   import ChatWeb.Username
   import ChatWeb.Storage
 
+  @impl true
   def mount(_params, _session, socket) do
-    Phoenix.PubSub.subscribe(Chat.PubSub,"chat")
+    Phoenix.PubSub.subscribe(Chat.PubSub, "chat")
     socket = assign(socket, username: generate_username())
     socket = assign(socket, messages: get_message_storage())
     socket = assign(socket, checked: false)
@@ -13,6 +14,7 @@ defmodule ChatWeb.ChatLive do
     {:ok, socket}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
       <section class="phx-hero">
@@ -37,6 +39,7 @@ defmodule ChatWeb.ChatLive do
     """
   end
 
+  @impl true
   def handle_event("send", params, socket) do
     time_stamp = Calendar.strftime(DateTime.utc_now(), "%A %d-%m-%Y %H:%M:%S")
     username = socket.assigns.username
@@ -47,12 +50,14 @@ defmodule ChatWeb.ChatLive do
     {:noreply, socket}
   end
 
+  @impl true
   def handle_event("like", params, socket) do
     update_message_likes(params, socket.assigns.username)
     broadcast_updated_messages()
     {:noreply, socket}
   end
 
+  @impl true
   def handle_event("filter", params, socket) do
     case params["toggle"] do
       "on" -> {:noreply, assign(socket, filter: params["filter-text"], checked: true,
@@ -61,6 +66,7 @@ defmodule ChatWeb.ChatLive do
     end
   end
 
+  @impl true
   def handle_info({:chat_update, _}, socket) do
     socket = assign(socket, :messages, get_message_storage())
     {:noreply, socket}

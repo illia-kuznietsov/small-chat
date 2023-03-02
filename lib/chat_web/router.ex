@@ -20,7 +20,6 @@ defmodule ChatWeb.Router do
     get "/", PageController, :home
 
     live "/chat", ChatLive
-    live "/trinary", TrinaryLive
   end
 
   # Other scopes may use custom stacks.
