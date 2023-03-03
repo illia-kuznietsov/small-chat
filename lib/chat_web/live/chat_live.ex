@@ -21,7 +21,7 @@ defmodule ChatWeb.ChatLive do
         <h1><%= gettext "Welcome to the Chat, %{name}!", name: @username %></h1>
       </section>
 
-      <div id="chat-box">
+      <div id=" chat-box">
         <%= for message <- @messages do%>
           <p><%= message.username %>  :  <%= message.message %></p>
           <button phx-click="like" phx-value-id={message.id} title={message.likes}><%= length(message.likes) %></button>
