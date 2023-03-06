@@ -20,22 +20,9 @@ defmodule ChatWeb.ChatLive do
       <section class="phx-hero">
         <h1><%= gettext "Welcome to the Chat, %{name}!", name: @username %></h1>
       </section>
-
-      <div id=" chat-box">
-        <%= for message <- @messages do%>
-          <p><%= message.username %>  :  <%= message.message %></p>
-          <button phx-click="like" phx-value-id={message.id} title={message.likes}><%= length(message.likes) %></button>
-        <% end %>
-      </div>
-
-    <form phx-submit="send">
-      <input type="text" placeholder="Your message" name="message" />
-      <button>Send</button>
-    </form>
-    <form phx-change="filter">
-      <input type="text" placeholder="search message here..." name="filter-text" value={@filter}/>
-      <input type="checkbox" name="toggle" checked={@checked}/>
-    </form>
+      <ChatWeb.ChatBoxLive.chat_box messages={@messages} />
+      <ChatWeb.CreateMessageFormLive.message_form />
+      <ChatWeb.SearchMessageFormLive.search_form checked={@checked} filter={@filter} />
     """
   end
 
