@@ -4,7 +4,7 @@ defmodule ChatWeb.CreateMessageFormLive do
 
   def message_form(assigns) do
     ~H"""
-      <form phx-submit="send">
+      <form id="message_form" phx-submit="send">
         <input type="text" placeholder="Your message" name="message" />
         <button>Send</button>
       </form>

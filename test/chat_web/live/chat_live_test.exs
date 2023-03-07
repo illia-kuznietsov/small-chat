@@ -5,7 +5,7 @@ defmodule ChatWeb.ChatLiveTest do
   test "connected mount", %{conn: conn} do
     conn = get(conn, "/chat")
     {:ok, _view, html} = conn |> live
-    assert html =~ "<form phx-submit=\"send\"><input type=\"text\" placeholder=\"Your message\" name=\"message\"/><button>Send</button></form>"
+    assert html =~ "<form id=\"message_form\" phx-submit=\"send\"><input type=\"text\" placeholder=\"Your message\" name=\"message\"/><button>Send</button></form>"
   end
 
   test "another mount test", %{conn: conn} do
@@ -18,11 +18,19 @@ defmodule ChatWeb.ChatLiveTest do
     assert render_component(&ChatWeb.ChatLive.render/1, assigns) =~ "<h1>Welcome to the Chat, test!</h1>"
   end
 
-#   test "handle_events" do
-#    socket.assigns = %{username: "test", messages: [], filter: "", checked: false}
-#    {:noreply, socket} = ChatWeb.ChatLive.handle_event("send", %{"message" => "blah"} , socket)
-#    assert Enum.any?(socket.assigns.messages, fn message -> message.message == "blah" end)
-#  end
+  test "chat box" do
+    assigns = [%{username: "test", message: "test", likes: [], id: "aaa"}]
+    assert render_component(&ChatWeb.ChatBoxLive.chat_box/1, messages: assigns) =~ "<p>test  :  test</p>"
+  end
+
+  test "send message", %{conn: conn} do
+    {:ok, view, _html} = live(conn, "/chat")
+
+    result = view
+    |> form("#message_form", %{"message" => "hello"})
+    |> render_submit()
+    assert result =~ "hello"
+  end
 
 
 end
