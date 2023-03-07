@@ -52,7 +52,7 @@ defmodule ChatWeb.ChatLive do
     |> assign(
       filter: text,
       checked: toggle == "on",
-      messages: filter_messages(text, toggle == "on")
+      messages: filter_messages(text, toggle)
     )
     |> then(&{:noreply, &1})
   end

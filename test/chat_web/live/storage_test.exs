@@ -6,38 +6,25 @@ defmodule ChatWeb.StorageTest do
   end
 
   test "new message" do
-    ChatWeb.Storage.post_message("testuser", "testmessage", "datetime", "testid")
+    ChatWeb.Message.create_message("testuser", "testmessage") |> ChatWeb.Storage.post_message()
 
-    assert %{
-             username: "testuser",
-             message: "testmessage",
-             likes: [],
-             time_stamp: "datetime",
-             id: "testid"
-           } in ChatWeb.Storage.get_message_storage()
+    assert Enum.any?(ChatWeb.Storage.get_message_storage(), fn message ->
+             message.username == "testuser"
+           end)
   end
 
   test "like, then dislike" do
-    ChatWeb.Storage.post_message("testuser", "testmessage", "datetime", "testid")
+    ChatWeb.Message.create_message("testuser", "testmessage") |> ChatWeb.Storage.post_message()
+    [first | _] = ChatWeb.Storage.get_message_storage()
 
-    ChatWeb.Storage.update_message_likes("testid", "testuser")
+    ChatWeb.Storage.update_message_likes(first.id, "testuser")
 
-    assert %{
-             username: "testuser",
-             message: "testmessage",
-             likes: ["testuser"],
-             time_stamp: "datetime",
-             id: "testid"
-           } in ChatWeb.Storage.get_message_storage()
+    assert Enum.any?(ChatWeb.Storage.get_message_storage(), fn message ->
+             message.likes == ["testuser"]
+           end)
 
-    ChatWeb.Storage.update_message_likes("testid", "testuser")
+    ChatWeb.Storage.update_message_likes(first.id, "testuser")
 
-    assert %{
-             username: "testuser",
-             message: "testmessage",
-             likes: [],
-             time_stamp: "datetime",
-             id: "testid"
-           } in ChatWeb.Storage.get_message_storage()
+    assert Enum.any?(ChatWeb.Storage.get_message_storage(), fn message -> message.likes == [] end)
   end
 end

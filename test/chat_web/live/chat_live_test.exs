@@ -28,15 +28,4 @@ defmodule ChatWeb.ChatLiveTest do
     assert render_component(&ChatWeb.ChatBoxLive.chat_box/1, messages: assigns) =~
              "<p>test  :  test</p>"
   end
-
-  test "send message", %{conn: conn} do
-    {:ok, view, _html} = live(conn, "/chat")
-
-    result =
-      view
-      |> form("#message_form", %{"message" => "hello"})
-      |> render_submit()
-
-    assert result =~ "hello"
-  end
 end

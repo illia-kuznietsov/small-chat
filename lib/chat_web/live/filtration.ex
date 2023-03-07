@@ -1,13 +1,13 @@
 defmodule ChatWeb.Filtration do
   import ChatWeb.Storage
 
-  def filter_messages(text, true),
+  def filter_messages(text, "on"),
     do:
       Enum.filter(filtrate_on_text(text), fn message ->
         length(message.likes) > 0
       end)
 
-  def filter_messages(text, false), do: filtrate_on_text(text)
+  def filter_messages(text, "off"), do: filtrate_on_text(text)
 
   defp filtrate_on_text(text) do
     case text do

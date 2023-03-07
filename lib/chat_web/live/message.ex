@@ -7,6 +7,6 @@ defmodule ChatWeb.Message do
       "id" => UUID.uuid4()
     }
 
-  defp create_timestamp(time \\ DateTime.utc_now()),
+  def create_timestamp(time \\ DateTime.utc_now()),
     do: Calendar.strftime(time, "%A %d-%m-%Y %H:%M:%S")
 end
