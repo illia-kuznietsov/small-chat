@@ -2,7 +2,9 @@ defmodule ChatWeb.ChatLive do
   use ChatWeb, :live_view
   use Phoenix.Component
   import ChatWeb.Username
+  import ChatWeb.Message
   import ChatWeb.Storage
+  import ChatWeb.Filtration
 
   @impl true
   def mount(_params, _session, socket) do
@@ -27,30 +29,28 @@ defmodule ChatWeb.ChatLive do
   end
 
   @impl true
-  def handle_event("send", params, socket) do
-    time_stamp = Calendar.strftime(DateTime.utc_now(), "%A %d-%m-%Y %H:%M:%S")
-    username = socket.assigns.username
-    message = params["message"]
-    id = UUID.uuid4()
-    post_message(username, message, time_stamp, id)
+  def handle_event("send", %{"message" => message}, socket) do
+    create_message(socket.assigns.username, message) |> post_message()
     broadcast_updated_messages()
     {:noreply, socket}
   end
 
   @impl true
-  def handle_event("like", params, socket) do
-    update_message_likes(params, socket.assigns.username)
+  def handle_event("like", %{"id" => id}, socket) do
+    update_message_likes(id, socket.assigns.username)
     broadcast_updated_messages()
     {:noreply, socket}
   end
 
   @impl true
-  def handle_event("filter", params, socket) do
-    case params["toggle"] do
-      "on" -> {:noreply, assign(socket, filter: params["filter-text"], checked: true,
-        messages: Enum.filter(filtrate_on_text(params["filter-text"]), fn message -> length(message.likes) > 0 end))}
-      nil -> {:noreply, assign(socket, filter: params["filter-text"], checked: false, messages: filtrate_on_text(params["filter-text"]))}
-    end
+  def handle_event("filter", %{"filter-text" => text, "toggle" => toggle}, socket) do
+    socket
+    |> assign(
+      filter: text,
+      checked: toggle == "on",
+      messages: filter_messages(text, toggle == "on")
+    )
+    |> then(&{:noreply, &1})
   end
 
   @impl true
@@ -59,13 +59,6 @@ defmodule ChatWeb.ChatLive do
     {:noreply, socket}
   end
 
-  defp filtrate_on_text(text) do
-    case text do
-      "" -> get_message_storage()
-      filter -> Enum.filter(get_message_storage(), fn message -> message.message =~ filter end)
-    end
-  end
-
-  defp broadcast_updated_messages(), do: Phoenix.PubSub.broadcast(Chat.PubSub, "chat", {:chat_update, "whatever"})
-
+  defp broadcast_updated_messages(),
+    do: Phoenix.PubSub.broadcast(Chat.PubSub, "chat", {:chat_update, "whatever"})
 end

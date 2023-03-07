@@ -6,6 +6,7 @@ defmodule ChatWeb.SearchMessageFormLive do
     ~H"""
       <form id="search_form" phx-change="filter">
         <input type="text" placeholder="search message here..." name="filter-text" value={@filter}/>
+        <input type='hidden' value="toggle-off" name="toggle">
         <input type="checkbox" name="toggle" checked={@checked}/>
       </form>
     """

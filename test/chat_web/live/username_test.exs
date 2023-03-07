@@ -5,5 +5,4 @@ defmodule ChatWeb.UsernameTest do
     testusername = ChatWeb.Username.generate_username()
     assert length(String.split(testusername, " ")) >= 2
   end
-
 end

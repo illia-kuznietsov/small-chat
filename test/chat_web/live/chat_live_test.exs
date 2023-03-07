@@ -5,7 +5,9 @@ defmodule ChatWeb.ChatLiveTest do
   test "connected mount", %{conn: conn} do
     conn = get(conn, "/chat")
     {:ok, _view, html} = conn |> live
-    assert html =~ "<form id=\"message_form\" phx-submit=\"send\"><input type=\"text\" placeholder=\"Your message\" name=\"message\"/><button>Send</button></form>"
+
+    assert html =~
+             "<form id=\"message_form\" phx-submit=\"send\"><input type=\"text\" placeholder=\"Your message\" name=\"message\"/><button>Send</button></form>"
   end
 
   test "another mount test", %{conn: conn} do
@@ -15,22 +17,26 @@ defmodule ChatWeb.ChatLiveTest do
 
   test "renders ok" do
     assigns = %{username: "test", messages: [], filter: "", checked: false}
-    assert render_component(&ChatWeb.ChatLive.render/1, assigns) =~ "<h1>Welcome to the Chat, test!</h1>"
+
+    assert render_component(&ChatWeb.ChatLive.render/1, assigns) =~
+             "<h1>Welcome to the Chat, test!</h1>"
   end
 
   test "chat box" do
     assigns = [%{username: "test", message: "test", likes: [], id: "aaa"}]
-    assert render_component(&ChatWeb.ChatBoxLive.chat_box/1, messages: assigns) =~ "<p>test  :  test</p>"
+
+    assert render_component(&ChatWeb.ChatBoxLive.chat_box/1, messages: assigns) =~
+             "<p>test  :  test</p>"
   end
 
   test "send message", %{conn: conn} do
     {:ok, view, _html} = live(conn, "/chat")
 
-    result = view
-    |> form("#message_form", %{"message" => "hello"})
-    |> render_submit()
+    result =
+      view
+      |> form("#message_form", %{"message" => "hello"})
+      |> render_submit()
+
     assert result =~ "hello"
   end
-
-
 end
