@@ -43,7 +43,11 @@ defmodule ChatWeb.ChatLive do
   end
 
   @impl true
-  def handle_event("filter", %{"filter-text" => text, "toggle" => toggle}, socket) do
+  def handle_event(
+        "filter",
+        %{"filter-text" => text, "like_filter" => %{"toggle" => toggle}},
+        socket
+      ) do
     socket
     |> assign(
       filter: text,
