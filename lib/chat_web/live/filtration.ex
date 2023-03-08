@@ -1,24 +1,22 @@
 defmodule ChatWeb.Filtration do
   import ChatWeb.Storage
 
-  def filter_messages(text, only_liked_toggle, liker_toggle, not_liked_toggle, minority_toggle),
+  def filter_messages(text, toggles),
     do:
       filtrate_on_text(text)
-      |> only_liked_filter(only_liked_toggle)
-      |> liker_filter(liker_toggle)
-      |> not_liked_filter(not_liked_toggle)
-      |> minority_filter(minority_toggle)
+      |> then(fn filtrated ->
+          Enum.reduce(toggles, filtrated, fn {key, value}, acc ->
+            acc = checkbox_filter(acc, key, value)
+          end)
+      end)
 
-  def only_liked_filter(messages, "on"),
+  def checkbox_filter(messages, "only-liked", "on"),
     do:
       Enum.filter(messages, fn message ->
         length(message.likes) > 0
       end)
 
-  def only_liked_filter(messages, "off"),
-    do: messages
-
-  def liker_filter(messages, "on"),
+  def checkbox_filter(messages, "liked-by-likers", "on"),
     do:
       Enum.filter(messages, fn message ->
         Enum.any?(message.likes, fn username ->
@@ -26,10 +24,7 @@ defmodule ChatWeb.Filtration do
         end)
       end)
 
-  def liker_filter(messages, "off"),
-    do: messages
-
-  def not_liked_filter(messages, "on"),
+  def checkbox_filter(messages, "not-liked-by-nonlikers", "on"),
     do:
       Enum.filter(messages, fn message ->
         message.likes == [] and
@@ -38,24 +33,22 @@ defmodule ChatWeb.Filtration do
           end)
       end)
 
-  def not_liked_filter(messages, "off"),
-    do: messages
-
-  def minority_filter(messages, "on") do
+  def checkbox_filter(messages, "20-percent-minority-most-liked", "on") do
     total_like_count_global = count_total_likes(messages)
+
     messages
     |> Enum.sort_by(&length(&1.likes), :desc)
     |> Enum.reduce_while([], fn message, acc ->
-      if length(message.likes) + count_total_likes(acc) < total_like_count_global * 0.8,
+      if count_total_likes(acc) < total_like_count_global * 0.8,
         do: {:cont, [message | acc]},
         else: {:halt, acc}
     end)
   end
 
-  def minority_filter(messages, "off"),
+  def checkbox_filter(messages, _key, "off"),
     do: messages
 
-  def count_total_likes(messages),
+  defp count_total_likes(messages),
     do: Enum.reduce(messages, 0, fn message, acc -> acc + length(message.likes) end)
 
   defp filtrate_on_text(text) do

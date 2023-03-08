@@ -46,20 +46,14 @@ defmodule ChatWeb.ChatLive do
         "filter",
         %{
           "filter-text" => text,
-          "like_filter" => %{
-            "20-percent-minority-most-liked" => minority_toggle,
-            "liked-by-likers" => liker_toggle,
-            "not-liked-by-nonlikers" => not_liked_toggle,
-            "only-liked" => only_liked_toggle
-          }
+          "like_filter" => toggles
         },
         socket
       ) do
     socket
     |> assign(
       filter: text,
-      messages:
-        filter_messages(text, only_liked_toggle, liker_toggle, not_liked_toggle, minority_toggle)
+      messages: filter_messages(text, toggles)
     )
     |> then(&{:noreply, &1})
   end
