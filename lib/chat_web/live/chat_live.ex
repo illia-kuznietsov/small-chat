@@ -11,7 +11,6 @@ defmodule ChatWeb.ChatLive do
     Phoenix.PubSub.subscribe(Chat.PubSub, "chat")
     socket = assign(socket, username: generate_username())
     socket = assign(socket, messages: get_message_storage())
-    socket = assign(socket, checked: false)
     socket = assign(socket, filter: "")
     {:ok, socket}
   end
@@ -24,7 +23,7 @@ defmodule ChatWeb.ChatLive do
       </section>
       <ChatWeb.ChatBoxLive.chat_box messages={@messages} />
       <ChatWeb.CreateMessageFormLive.message_form />
-      <ChatWeb.SearchMessageFormLive.search_form checked={@checked} filter={@filter} />
+      <ChatWeb.SearchMessageFormLive.search_form filter={@filter} />
     """
   end
 
@@ -45,14 +44,22 @@ defmodule ChatWeb.ChatLive do
   @impl true
   def handle_event(
         "filter",
-        %{"filter-text" => text, "like_filter" => %{"toggle" => toggle}},
+        %{
+          "filter-text" => text,
+          "like_filter" => %{
+            "20-percent-minority-most-liked" => minority_toggle,
+            "liked-by-likers" => liker_toggle,
+            "not-liked-by-nonlikers" => not_liked_toggle,
+            "only-liked" => only_liked_toggle
+          }
+        },
         socket
       ) do
     socket
     |> assign(
       filter: text,
-      checked: toggle == "on",
-      messages: filter_messages(text, toggle)
+      messages:
+        filter_messages(text, only_liked_toggle, liker_toggle, not_liked_toggle, minority_toggle)
     )
     |> then(&{:noreply, &1})
   end
