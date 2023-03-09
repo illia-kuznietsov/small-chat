@@ -5,9 +5,9 @@ defmodule ChatWeb.Filtration do
     do:
       filtrate_on_text(text)
       |> then(fn filtrated ->
-          Enum.reduce(toggles, filtrated, fn {key, value}, acc ->
-            acc = checkbox_filter(acc, key, value)
-          end)
+        Enum.reduce(toggles, filtrated, fn {key, value}, acc ->
+          acc = checkbox_filter(acc, key, value)
+        end)
       end)
 
   def checkbox_filter(messages, "only-liked", "on"),
@@ -44,6 +44,9 @@ defmodule ChatWeb.Filtration do
         else: {:halt, acc}
     end)
   end
+
+  def checkbox_filter(messages, _not_implemented, "on"),
+    do: messages
 
   def checkbox_filter(messages, _key, "off"),
     do: messages

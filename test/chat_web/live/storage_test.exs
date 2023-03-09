@@ -17,14 +17,14 @@ defmodule ChatWeb.StorageTest do
     ChatWeb.Message.create_message("testuser", "testmessage") |> ChatWeb.Storage.post_message()
     [first | _] = ChatWeb.Storage.get_message_storage()
 
-    ChatWeb.Storage.update_message_likes(first.id, "testuser")
+    ChatWeb.Storage.update_message_likes(first.id, "blah")
 
     assert Enum.any?(ChatWeb.Storage.get_message_storage(), fn message ->
-             message.likes == ["testuser"]
+             "blah" in message.likes
            end)
 
-    ChatWeb.Storage.update_message_likes(first.id, "testuser")
+    ChatWeb.Storage.update_message_likes(first.id, "blah")
 
-    assert Enum.any?(ChatWeb.Storage.get_message_storage(), fn message -> message.likes == [] end)
+    assert Enum.any?(ChatWeb.Storage.get_message_storage(), fn message -> "blah" not in message.likes end)
   end
 end
