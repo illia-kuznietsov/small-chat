@@ -25,6 +25,8 @@ defmodule ChatWeb.StorageTest do
 
     ChatWeb.Storage.update_message_likes(first.id, "blah")
 
-    assert Enum.any?(ChatWeb.Storage.get_message_storage(), fn message -> "blah" not in message.likes end)
+    assert Enum.any?(ChatWeb.Storage.get_message_storage(), fn message ->
+             "blah" not in message.likes
+           end)
   end
 end

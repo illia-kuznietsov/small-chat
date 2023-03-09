@@ -10,7 +10,7 @@ defmodule Chat.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      test_coverage: [ignore_modules: [ChatWeb.CoreComponents]]
+      test_coverage: [summary: [threshold: 75], ignore_modules: [ChatWeb.CoreComponents]]
     ]
   end
 

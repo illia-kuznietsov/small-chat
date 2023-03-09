@@ -1,4 +1,5 @@
 defmodule ChatWeb.ErrorHTML do
+  @moduledoc false
   use ChatWeb, :html
 
   # If you want to customize your error pages,

@@ -3,10 +3,10 @@ defmodule ChatWeb.MessageTest do
 
   test "create message" do
     message = ChatWeb.Message.create_message("illia", "hello")
-    assert message["username"] == "illia"
-    assert message["message"] == "hello"
-    assert message["id"] != ""
-    assert message["time_stamp"] != ""
+    assert message.username == "illia"
+    assert message.message == "hello"
+    assert message.id != ""
+    assert message.time_stamp != ""
   end
 
   test "correct format" do

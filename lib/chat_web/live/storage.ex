@@ -11,14 +11,9 @@ defmodule ChatWeb.Storage do
   @doc """
   Provided given parameters, creates a message and puts it into message storage
   """
-  def post_message(%{
-        "username" => username,
-        "message" => message,
-        "time_stamp" => time_stamp,
-        "id" => id
-      }) do
+  def post_message(message) do
     Agent.update(MessageStorage, fn list ->
-      [%{username: username, message: message, likes: [], time_stamp: time_stamp, id: id} | list]
+      [message | list]
     end)
   end
 
@@ -32,10 +27,8 @@ defmodule ChatWeb.Storage do
     end)
   end
 
-  @pdoc """
-  gets a list of messages, finds a message by its id, and then updates the like count
-  if the user already liked the message, the logic retracts the like (username) from the list
-  """
+  # gets a list of messages, finds a message by its id, and then updates the like count
+  # if the user already liked the message, the logic retracts the like (username) from the list
   defp find_and_update_likes(list, id, username) do
     update_in(
       list,
