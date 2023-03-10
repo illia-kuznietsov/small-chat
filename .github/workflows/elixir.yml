@@ -38,6 +38,8 @@ jobs:
     - name: Run tests
       run: mix test --cover
     - name: Format the code
-      run: mix format
+      run: mix format --check-formatted
     - name: Check credo
       run: mix credo -a
+    - name: Compilation
+      run: mix compile --warnings-as-errors
