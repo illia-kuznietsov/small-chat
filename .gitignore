@@ -32,3 +32,6 @@ chat-*.tar
 npm-debug.log
 /assets/node_modules/
 
+/.idea
+/cover
+chat.iml
