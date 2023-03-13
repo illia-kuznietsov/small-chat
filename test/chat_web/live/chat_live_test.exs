@@ -12,7 +12,9 @@ defmodule ChatWeb.ChatLiveTest do
 
   test "another mount test", %{conn: conn} do
     conn = get(conn, "/chat")
-    assert html_response(conn, 200) =~ "<h1>Welcome to the Chat, \n #{conn.assigns.username}!</h1>"
+
+    assert html_response(conn, 200) =~
+             "<h1>Welcome to the Chat, \n #{conn.assigns.username}!</h1>"
   end
 
   test "renders ok" do
