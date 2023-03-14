@@ -21,7 +21,8 @@ defmodule Chat.Application do
       %{
         id: MessageStorage,
         start: {Agent, :start_link, [fn -> [] end, [name: MessageStorage]]}
-      }
+      },
+      Chat.Repo
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

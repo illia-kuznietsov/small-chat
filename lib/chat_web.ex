@@ -17,7 +17,7 @@ defmodule ChatWeb do
   those modules here.
   """
 
-  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
+  def static_paths, do: ~w(assets fonts images profile_pics mini_pics favicon.ico robots.txt)
 
   def router do
     quote do
