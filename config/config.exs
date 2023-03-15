@@ -11,8 +11,8 @@ config :chat,
   ecto_repos: [Chat.Repo]
 
 config :chat, Chat.Repo,
-  database: "postgres",
-  username: "illiakuznietsov",
+  database: "chat",
+  username: "postgres",
   password: "postgres",
   hostname: "localhost"
 

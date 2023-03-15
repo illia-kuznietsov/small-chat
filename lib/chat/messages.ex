@@ -1,4 +1,4 @@
-defmodule Chat.Message do
+defmodule Chat.Messages do
   use Ecto.Schema
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -6,6 +6,6 @@ defmodule Chat.Message do
     field :message_text, :string
     field :username, :string
     field :time_stamp, :string
-    field :likes, {:array, string}
+    has_many :likes, Chat.Likes
   end
 end

@@ -6,7 +6,6 @@ defmodule Chat.Repo.Migrations.CreateMessages do
       add :message_text, :string
       add :username, :string
       add :time_stamp, :string
-      add :likes, {:array, :string}
     end
   end
 end
