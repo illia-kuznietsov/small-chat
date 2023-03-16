@@ -9,7 +9,7 @@ defmodule ChatWeb.Storage do
   @doc """
   Gets a list that represents message storage from Agent
   """
-  def get_message_storage(), do: Repo.all(Chat.Message, preload: [:likes])
+  def get_message_storage(), do: Repo.all(Chat.Message) |> Repo.preload([:likes])
 
   @doc """
   Provided given parameters, creates a message and puts it into message storage
@@ -31,7 +31,7 @@ defmodule ChatWeb.Storage do
 
         message
         |> Ecto.Changeset.change()
-        |> Ecto.Changeset.put_assoc(:likes, [like])
+        |> Ecto.Changeset.put_assoc(:likes, [like | message.likes])
         |> Repo.update!()
 
       like ->
