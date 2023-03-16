@@ -6,12 +6,10 @@ defmodule ChatWeb.Message do
   basically creates a message struct
   """
   def create_message(username, message),
-    do: %{
+    do: %Chat.Message{
       time_stamp: create_timestamp(),
-      username: username,
-      message: message,
-      id: UUID.uuid4(),
-      likes: []
+      author_username: username,
+      message_text: message
     }
 
   @doc """
