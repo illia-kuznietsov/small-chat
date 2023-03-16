@@ -18,9 +18,8 @@ defmodule ChatWeb.Username do
     "#{adjective} #{animal}"
   end
 
-  @pdoc """
-  Given a path, loads a file from it into stream, from which the function picks and returns a random word
-  """
+
+  #Given a path, loads a file from it into stream, from which the function picks and returns a random word
   defp load_pick_random(path) do
     File.stream!(Application.app_dir(:chat, path)) |> Enum.map(&String.trim/1) |> Enum.random()
   end
