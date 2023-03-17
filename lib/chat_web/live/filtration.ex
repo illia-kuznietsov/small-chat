@@ -37,13 +37,13 @@ defmodule ChatWeb.Filtration do
   def checkbox_filter(messages, "liked-by-likers", "on"),
     do:
       Enum.filter(messages, fn message ->
-        Enum.any?(message.likes, fn username ->
+        Enum.any?(message.likes, fn like ->
           others =
             for msg <- messages -- [message], reduce: [] do
-              acc -> acc ++ msg.likes
+              acc -> acc ++ Enum.map(msg.likes, fn l -> l.like_username end)
             end
 
-          username in others
+          like.like_username in others
         end)
       end)
 
@@ -54,7 +54,7 @@ defmodule ChatWeb.Filtration do
       Enum.filter(messages, fn message ->
         message.likes == [] and
           Enum.all?(messages, fn msg ->
-            message.username not in msg.likes
+            message.author_username not in Enum.map(msg.likes, fn l -> l.like_username end)
           end)
       end)
 
@@ -88,7 +88,7 @@ defmodule ChatWeb.Filtration do
   defp filtrate_on_text(messages, text) do
     case text do
       "" -> messages
-      filter -> Enum.filter(messages, fn message -> message.message =~ filter end)
+      filter -> Enum.filter(messages, fn message -> message.message_text =~ filter end)
     end
   end
 end
