@@ -10,11 +10,7 @@ import Config
 config :chat,
   ecto_repos: [Chat.Repo]
 
-config :chat, Chat.Repo,
-  database: "chat",
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost"
+
 
 # Configures the endpoint
 config :chat, ChatWeb.Endpoint,
