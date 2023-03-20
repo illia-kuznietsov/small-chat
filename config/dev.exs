@@ -7,10 +7,10 @@ import Config
 # watchers to your application. For example, we use it
 # with esbuild to bundle .js and .css sources.
 config :chat, Chat.Repo,
-       database: "chat",
-       username: "postgres",
-       password: "postgres",
-       hostname: "localhost"
+  database: "chat",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost"
 
 config :chat, ChatWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.

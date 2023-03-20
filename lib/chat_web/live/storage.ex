@@ -1,6 +1,5 @@
 defmodule ChatWeb.Storage do
   alias Chat.Repo
-  import Ecto.Query
 
   @moduledoc """
   Provides a small logic of message storage, that is initialized with the start of the server, for now
@@ -37,9 +36,17 @@ defmodule ChatWeb.Storage do
       like ->
         like_id = like.id
         message_id = message.id
-        query = "SELECT ml.id FROM message_like as ml WHERE ml.like_id = #{like_id} AND ml.message_id = #{message_id};"
+
+        query =
+          "SELECT ml.id FROM message_like as ml WHERE ml.like_id = #{like_id} AND ml.message_id = #{message_id};"
+
         result = Repo.query!(query)
-        result.rows |> List.flatten() |> Enum.fetch!(0) |> then(&Repo.get!(Chat.MessageLike, &1)) |> Repo.delete!()
+
+        result.rows
+        |> List.flatten()
+        |> Enum.fetch!(0)
+        |> then(&Repo.get!(Chat.MessageLike, &1))
+        |> Repo.delete!()
     end
   end
 
