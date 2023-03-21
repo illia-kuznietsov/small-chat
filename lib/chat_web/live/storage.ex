@@ -1,5 +1,6 @@
 defmodule ChatWeb.Storage do
   alias Chat.Repo
+  import Ecto.Changeset
 
   @moduledoc """
   Provides a small logic of message storage, that is initialized with the start of the server, for now
@@ -21,33 +22,41 @@ defmodule ChatWeb.Storage do
   params contain id of the message that is supposed to be liked (or unliked) by a given user, so the list of usernames
   that liked the message gets updated
   """
-  def update_message_likes(id, username) do
-    message = Repo.get!(Chat.Message, id) |> Repo.preload([:likes])
-
-    case Enum.find(message.likes, fn like -> like.like_username == username end) do
-      nil ->
-        like = Repo.insert!(%Chat.Like{like_username: username})
-
-        message
-        |> Ecto.Changeset.change()
-        |> Ecto.Changeset.put_assoc(:likes, [like | message.likes])
-        |> Repo.update!()
-
-      like ->
-        like_id = like.id
-        message_id = message.id
-
-        query =
-          "SELECT ml.id FROM message_like as ml WHERE ml.like_id = #{like_id} AND ml.message_id = #{message_id};"
-
-        result = Repo.query!(query)
-
-        result.rows
-        |> List.flatten()
-        |> Enum.fetch!(0)
-        |> then(&Repo.get!(Chat.MessageLike, &1))
-        |> Repo.delete!()
-    end
+  def update_message_likes(message_id, user_id) do
+    message = Repo.get!(Chat.Message, message_id) |> Repo.preload([:likes])
+    user = Repo.get(Chat.User, user_id) |> Repo.preload([:likes])
+    IO.inspect(message, label: "message : ")
+    params = %{likes: [user | message.likes]}
+    IO.inspect(params, label: "params : ")
+    message
+    |> cast(params, [])
+    |> cast_assoc(:likes, [user | message.likes])
+    |> IO.inspect(label: "message now : ")
+#    case Enum.find(message.likes, fn like -> like.username == user.username end) do
+#      nil ->
+#        like = %Chat.User{username: user.username}
+#        params = %{likes: [like | message.likes]}
+#        message
+#        |> Ecto.Changeset.cast(params, [])
+#        |> Ecto.Changeset.cast_assoc(likes)
+#
+#
+#
+#      like ->
+#        like_id = like.id
+#        message_id = message.id
+#
+#        query =
+#          "SELECT ml.id FROM message_like as ml WHERE ml.like_id = #{like_id} AND ml.message_id = #{message_id};"
+#
+#        result = Repo.query!(query)
+#
+#        result.rows
+#        |> List.flatten()
+#        |> Enum.fetch!(0)
+#        |> then(&Repo.get!(Chat.MessageLike, &1))
+#        |> Repo.delete!()
+#    end
   end
 
   # gets a list of messages, finds a message by its id, and then updates the like count

@@ -31,65 +31,37 @@ defmodule ChatWeb.Filtration do
   """
   # returns messages that currently have likes, discarding the ones that do not
   def checkbox_filter(query, "only-liked", "on") do
-    ml_query =  "SELECT ml.message_id, count(ml.like_id) FROM message_like as ml GROUP BY ml.message_id WHERE count(ml.like_id) > 0"
-    from m in query, where: m.id in (^ml_query)
+    ml_query =
+      "SELECT ml.message_id FROM message_like AS ml GROUP BY ml.message_id HAVING count(ml.like_id) > 0;"
+
+    ids = Repo.query!(ml_query).rows |> List.flatten()
+    from(m in query, where: m.id in ^ids)
   end
 
   # returns messages based on the following criteria: message should contain at least one like
   # from a person that liked other messages apart from the one in question
-  def checkbox_filter(query, "liked-by-likers", "on") do
-    ml_query = "SELECT ml.message_id, count(ml.message_id) FROM message_like as ml GROUP BY ml.like_id WHERE count(ml.message_id) > 1"
-    from m in query, where: m.id in (^ml_query)
-  end
+    def checkbox_filter(query, "liked-by-likers", "on") do
+      ml_query = "SELECT * FROM message_like WHERE message_id = 1 or message_id = 2"
+#      ml_query = "SELECT message_id FROM message_like WHERE like_id IN(SELECT like_id FROM message_like GROUP BY like_id HAVING COUNT(like_id) > 1);"
+      ids = Repo.query!(ml_query).rows |> IO.inspect(label: "query result")
+      from m in query, where: m.id in (^ids)
+    end
 
-  # returns messages based on the following criteria: message should come from a user that didn't like any message, and it
-  # shouldn't have any likes itself
-  def checkbox_filter(query, "not-liked-by-nonlikers", "on") do
-    ml_query = "SELECT ml.message_id, count(ml.like_id) FROM message_like as ml GROUP BY ml.message_id WHERE count(ml.like_id) = 0"
-    from m in query, where: m.id in (^ml_query)
-  end
-#    do:
-#      from(m in query,
-#        where:
-#          m.likes == [] and
-#            m.author_username not in Repo.all(query)
-#            |> Repo.preload([:likes])
-#            |> Enum.map(fn m -> m.likes end)
-#            |> List.flatten()
-#      )
+    # returns messages based on the following criteria: message should come from a user that didn't like any message, and it
+    # shouldn't have any likes itself
+    def checkbox_filter(query, "not-liked-by-nonlikers", "on") do
+      ml_query = "SELECT ml.message_id FROM (SELECT ml from message_like as ml GROUP BY ml.like_id HAVING COUNT(ml.message_id) > 0"
+      ids = Repo.query!(ml_query).rows |> List.flatten()
+      from m in query, where: m.id not in (^ids)
+    end
 
-  #      Enum.filter(messages, fn message ->
-  #        message.likes == [] and
-  #          Enum.all?(messages, fn msg ->
-  #            message.author_username not in Enum.map(msg.likes, fn l -> l.like_username end)
-  #          end)
-  #      end)
-
-  # returns messages based on the following criteria: the least amount of messages holding 80%+ of all likes
-  # in the message timeline
-#  def checkbox_filter(query, "20-percent-minority-most-liked", "on") do
-#    total_like_count_global = count_total_likes(get_message_storage())
-#
-#    from(m in query,
-#      where:
-#        (m in Repo.all(query))
-#        |> Repo.preload([:likes])
-#        |> Enum.sort_by(&length(&1.likes), :desc)
-#        |> Enum.reduce_while([], fn message, acc ->
-#          if count_total_likes(acc) < total_like_count_global * 0.8,
-#            do: {:cont, [message | acc]},
-#            else: {:halt, acc}
-#        end)
-#    )
-
-    #    messages
-    #    |> Enum.sort_by(&length(&1.likes), :desc)
-    #    |> Enum.reduce_while([], fn message, acc ->
-    #      if count_total_likes(acc) < total_like_count_global * 0.8,
-    #        do: {:cont, [message | acc]},
-    #        else: {:halt, acc}
-    #    end)
-#  end
+    # returns messages based on the following criteria: the least amount of messages holding 80%+ of all likes
+    # in the message timeline
+    def checkbox_filter(query, "20-percent-minority-most-liked", "on") do
+      ml_query = "SELECT top (20) percent ml.id from message_like as ml order by count(ml.like_id)"
+      ids = Repo.query!(ml_query).rows |> List.flatten()
+      from m in query, where: m.id in (^ids)
+    end
 
   # this is a sort of placeholder for all the toggles not yet implemented
   def checkbox_filter(query, _not_implemented, "on"),
@@ -99,13 +71,10 @@ defmodule ChatWeb.Filtration do
   def checkbox_filter(query, _key, "off"),
     do: query
 
-  # given a list of messages, counts the total number of likes that they have
-  defp count_total_likes(messages),
-    do: Enum.reduce(messages, 0, fn message, acc -> acc + length(message.likes) end)
-
   # given a text, searches for messages that contain it
   defp filtrate_on_text(text) do
     filter = "%#{text}%"
+
     case text do
       "" -> from(m in Chat.Message)
       _ -> from(m in Chat.Message, where: like(m.message_text, ^filter))

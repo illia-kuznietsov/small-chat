@@ -5,11 +5,15 @@ defmodule ChatWeb.ChatLive do
   import ChatWeb.Message
   import ChatWeb.Storage
   import ChatWeb.Filtration
+  import ChatWeb.User
 
   @impl true
   def mount(_params, _session, socket) do
     Phoenix.PubSub.subscribe(Chat.PubSub, "chat")
-    socket = assign(socket, username: generate_username())
+    username = generate_username()
+    user_id = save_user(username).id
+    socket = assign(socket, username: username)
+    socket = assign(socket, user_id: user_id)
     socket = assign(socket, profile: "default.jpg")
     socket = assign(socket, mini: "default.png")
     socket = assign(socket, messages: get_message_storage())
@@ -105,8 +109,8 @@ defmodule ChatWeb.ChatLive do
   end
 
   @impl true
-  def handle_event("like", %{"id" => id}, socket) do
-    update_message_likes(id, socket.assigns.username)
+  def handle_event("like", %{"id" => message_id}, socket) do
+    update_message_likes(message_id, socket.assigns.user_id)
     broadcast_updated_messages()
     {:noreply, socket}
   end

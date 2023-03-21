@@ -6,7 +6,7 @@ defmodule Chat.Message do
     field(:message_text, :string)
     field(:author_username, :string)
     field(:time_stamp, :string)
-    many_to_many(:likes, Chat.Like, join_through: Chat.MessageLike, defaults: [])
+    many_to_many(:likes, Chat.User, join_through: Chat.Like, defaults: [])
   end
 
   def changeset(struct, params) do
