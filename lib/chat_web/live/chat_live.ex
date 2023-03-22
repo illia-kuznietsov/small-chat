@@ -1,11 +1,8 @@
 defmodule ChatWeb.ChatLive do
   use ChatWeb, :live_view
   use Phoenix.Component
-  import ChatWeb.Username
-  import ChatWeb.Message
-  import ChatWeb.Storage
-  import ChatWeb.Filtration
-  import ChatWeb.User
+  import ChatWeb.{Username, Storage, Filtration}
+
 
   @impl true
   def mount(_params, _session, socket) do
@@ -16,7 +13,7 @@ defmodule ChatWeb.ChatLive do
     socket = assign(socket, user_id: user_id)
     socket = assign(socket, profile: "default.jpg")
     socket = assign(socket, mini: "default.png")
-    socket = assign(socket, messages: get_message_storage())
+    socket = assign(socket, messages: filter_messages("", []))
     socket = assign(socket, filter: "")
     {:ok, socket}
   end
@@ -103,7 +100,7 @@ defmodule ChatWeb.ChatLive do
 
   @impl true
   def handle_event("send", %{"message" => message}, socket) do
-    create_message(socket.assigns.username, message) |> post_message()
+    post_message(message, socket.assigns.user_id, socket.assigns.username)
     broadcast_updated_messages()
     {:noreply, socket}
   end

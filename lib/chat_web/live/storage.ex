@@ -1,15 +1,17 @@
 defmodule ChatWeb.Storage do
-  alias Chat.Repo
+  alias Chat.{Repo, User, Message, Like}
   import Ecto.Changeset
 
   @moduledoc """
-  Provides a small logic of message storage, that is initialized with the start of the server, for now
+  Provides a small logic that revolves around storage of messages, users and their relations too
   """
 
   @doc """
-  Gets a list that represents message storage from Agent
+  given a generated username, inserts user into the database
   """
-  def get_message_storage(), do: Repo.all(Chat.Message) |> Repo.preload([:likes])
+  def save_user(username) do
+    Repo.insert!(%User{username: username})
+  end
 
   @doc """
   Provided given parameters, creates a message and puts it into message storage

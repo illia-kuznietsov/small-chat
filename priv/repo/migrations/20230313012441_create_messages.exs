@@ -3,9 +3,11 @@ defmodule Chat.Repo.Migrations.CreateMessages do
 
   def change do
     create table(:messages) do
+      add :author, references(:users, on_delete: :delete_all)
       add :author_username, :string, null: false
-      add :message_text, :text
-      add :time_stamp, :string, null: false
+      add :text_body, :text
+
+      timestamps()
     end
   end
 end
