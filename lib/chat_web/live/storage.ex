@@ -48,47 +48,6 @@ defmodule ChatWeb.Storage do
         Repo.one!(query)
         |> Repo.delete!()
     end
-
-    #    case Enum.find(message.likes, fn like -> like.username == user.username end) do
-    #      nil ->
-    #        like = %Chat.User{username: user.username}
-    #        params = %{likes: [like | message.likes]}
-    #        message
-    #        |> Ecto.Changeset.cast(params, [])
-    #        |> Ecto.Changeset.cast_assoc(likes)
-    #
-    #
-    #
-    #      like ->
-    #        like_id = like.id
-    #        message_id = message.id
-    #
-    #        query =
-    #          "SELECT ml.id FROM message_like as ml WHERE ml.like_id = #{like_id} AND ml.message_id = #{message_id};"
-    #
-    #        result = Repo.query!(query)
-    #
-    #        result.rows
-    #        |> List.flatten()
-    #        |> Enum.fetch!(0)
-    #        |> then(&Repo.get!(Chat.MessageLike, &1))
-    #        |> Repo.delete!()
-    #    end
   end
 
-  # gets a list of messages, finds a message by its id, and then updates the like count
-  # if the user already liked the message, the logic retracts the like (username) from the list
-  #  defp find_and_update_likes(list, id, username) do
-  #    update_in(
-  #      list,
-  #      [Access.filter(&match?(%{id: ^id}, &1))],
-  #      &Map.replace_lazy(&1, :likes, fn v ->
-  #        if Enum.member?(v, username) do
-  #          v -- [username]
-  #        else
-  #          [username | v]
-  #        end
-  #      end)
-  #    )
-  #  end
 end
