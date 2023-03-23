@@ -11,5 +11,4 @@ defmodule Chat.Message do
 
     timestamps()
   end
-
 end

@@ -7,8 +7,8 @@ defmodule Chat.User do
     field(:username, :string)
     many_to_many(:likes, Message, join_through: Like, defaults: [])
     has_many(:messages, Message, defaults: [])
-
   end
+
   def changeset(struct, params) do
     struct
     |> cast(params, [:username])

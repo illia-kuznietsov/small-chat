@@ -4,7 +4,6 @@ defmodule ChatWeb.ChatLive do
   import ChatWeb.{Username, Storage, Filtration}
   alias Chat.{Repo, Message}
 
-
   @impl true
   def mount(_params, _session, socket) do
     Phoenix.PubSub.subscribe(Chat.PubSub, "chat")

@@ -40,28 +40,31 @@ defmodule ChatWeb.Filtration do
 
   # returns messages based on the following criteria: message should contain at least one like
   # from a person that liked other messages apart from the one in question
-    def checkbox_filter(query, "liked-by-likers", "on") do
-      ml_query = "SELECT * FROM message_like WHERE message_id = 1 or message_id = 2"
-#      ml_query = "SELECT message_id FROM message_like WHERE like_id IN(SELECT like_id FROM message_like GROUP BY like_id HAVING COUNT(like_id) > 1);"
-      ids = Repo.query!(ml_query).rows |> IO.inspect(label: "query result")
-      from m in query, where: m.id in (^ids)
-    end
+  def checkbox_filter(query, "liked-by-likers", "on") do
+    ml_query = "SELECT * FROM message_like WHERE message_id = 1 or message_id = 2"
 
-    # returns messages based on the following criteria: message should come from a user that didn't like any message, and it
-    # shouldn't have any likes itself
-    def checkbox_filter(query, "not-liked-by-nonlikers", "on") do
-      ml_query = "SELECT ml.message_id FROM (SELECT ml from message_like as ml GROUP BY ml.like_id HAVING COUNT(ml.message_id) > 0"
-      ids = Repo.query!(ml_query).rows |> List.flatten()
-      from m in query, where: m.id not in (^ids)
-    end
+    #      ml_query = "SELECT message_id FROM message_like WHERE like_id IN(SELECT like_id FROM message_like GROUP BY like_id HAVING COUNT(like_id) > 1);"
+    ids = Repo.query!(ml_query).rows |> IO.inspect(label: "query result")
+    from(m in query, where: m.id in ^ids)
+  end
 
-    # returns messages based on the following criteria: the least amount of messages holding 80%+ of all likes
-    # in the message timeline
-    def checkbox_filter(query, "20-percent-minority-most-liked", "on") do
-      ml_query = "SELECT top (20) percent ml.id from message_like as ml order by count(ml.like_id)"
-      ids = Repo.query!(ml_query).rows |> List.flatten()
-      from m in query, where: m.id in (^ids)
-    end
+  # returns messages based on the following criteria: message should come from a user that didn't like any message, and it
+  # shouldn't have any likes itself
+  def checkbox_filter(query, "not-liked-by-nonlikers", "on") do
+    ml_query =
+      "SELECT ml.message_id FROM (SELECT ml from message_like as ml GROUP BY ml.like_id HAVING COUNT(ml.message_id) > 0"
+
+    ids = Repo.query!(ml_query).rows |> List.flatten()
+    from(m in query, where: m.id not in ^ids)
+  end
+
+  # returns messages based on the following criteria: the least amount of messages holding 80%+ of all likes
+  # in the message timeline
+  def checkbox_filter(query, "20-percent-minority-most-liked", "on") do
+    ml_query = "SELECT top (20) percent ml.id from message_like as ml order by count(ml.like_id)"
+    ids = Repo.query!(ml_query).rows |> List.flatten()
+    from(m in query, where: m.id in ^ids)
+  end
 
   # this is a sort of placeholder for all the toggles not yet implemented
   def checkbox_filter(query, _not_implemented, "on"),
