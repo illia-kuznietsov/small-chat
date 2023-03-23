@@ -77,7 +77,7 @@ defmodule ChatWeb.Filtration do
 
     case text do
       "" -> from(m in Chat.Message)
-      _ -> from(m in Chat.Message, where: like(m.message_text, ^filter))
+      _ -> from(m in Chat.Message, where: like(m.text_body, ^filter))
     end
   end
 end

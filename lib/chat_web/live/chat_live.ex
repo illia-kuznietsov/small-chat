@@ -2,6 +2,7 @@ defmodule ChatWeb.ChatLive do
   use ChatWeb, :live_view
   use Phoenix.Component
   import ChatWeb.{Username, Storage, Filtration}
+  alias Chat.{Repo, Message}
 
 
   @impl true
@@ -131,7 +132,7 @@ defmodule ChatWeb.ChatLive do
 
   @impl true
   def handle_info({:chat_update, _}, socket) do
-    socket = assign(socket, :messages, get_message_storage())
+    socket = assign(socket, :messages, Repo.all(Message) |> Repo.preload([:likes]))
     {:noreply, socket}
   end
 

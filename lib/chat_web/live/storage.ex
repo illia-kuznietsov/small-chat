@@ -16,8 +16,9 @@ defmodule ChatWeb.Storage do
   @doc """
   Provided given parameters, creates a message and puts it into message storage
   """
-  def post_message(message) do
-    Repo.insert!(message)
+  def post_message(message, user_id, username) do
+    message_struct = %Message{author_username: username, text_body: message, author: Repo.get!(User, user_id)}
+    Repo.insert!(message_struct)
   end
 
   @doc """
