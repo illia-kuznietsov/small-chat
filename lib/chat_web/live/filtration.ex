@@ -31,8 +31,7 @@ defmodule ChatWeb.Filtration do
   """
   # returns messages that currently have likes, discarding the ones that do not
   def checkbox_filter(query, "only-liked", "on") do
-    ml_query =
-      "SELECT l.message_id
+    ml_query = "SELECT l.message_id
       FROM likes AS l
       GROUP BY l.message_id
       HAVING count(l.user_id) > 0;"
@@ -59,14 +58,12 @@ defmodule ChatWeb.Filtration do
   # returns messages based on the following criteria: message should come from a user that didn't like any message, and it
   # shouldn't have any likes itself
   def checkbox_filter(query, "not-liked-by-nonlikers", "on") do
-    l_query =
-      "SELECT l.message_id
+    l_query = "SELECT l.message_id
       FROM likes AS l
       GROUP BY l.message_id
       HAVING count(l.user_id) > 0;"
     l_ids = Repo.query!(l_query).rows |> List.flatten()
-    m_query =
-      "SELECT user_id
+    m_query = "SELECT user_id
       FROM likes
       GROUP BY user_id
       HAVING COUNT(*) > 0;"
@@ -78,11 +75,10 @@ defmodule ChatWeb.Filtration do
   # returns messages based on the following criteria: the least amount of messages holding 80%+ of all likes
   # in the message timeline
   def checkbox_filter(query, "20-percent-minority-most-liked", "on") do
-    ml_query =
-      "SELECT message_id FROM (SELECT message_id,
+    ml_query = "SELECT message_id FROM (SELECT message_id,
       percent_rank() OVER (ORDER BY COUNT(user_id) desc) as pct_rank
       FROM likes
-      GROUP BY message_id) as x WHERE pct_rank <= 0.8;"
+      GROUP BY message_id) as x WHERE pct_rank < 0.8;"
 
     ids = Repo.query!(ml_query).rows |> List.flatten()
     from(m in query, where: m.id in ^ids)

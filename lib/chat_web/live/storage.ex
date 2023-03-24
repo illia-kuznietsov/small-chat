@@ -32,8 +32,8 @@ defmodule ChatWeb.Storage do
   that liked the message gets updated
   """
   def update_message_likes(message_id, user_id) do
-    message = Repo.get!(Chat.Message, message_id) |> Repo.preload([:likes])
-    user = Repo.get(Chat.User, user_id) |> Repo.preload([:likes])
+    message = Repo.get!(Message, message_id) |> Repo.preload([:likes])
+    user = Repo.get(User, user_id) |> Repo.preload([:likes])
 
     case Enum.find(message.likes, fn like -> like.id == user.id end) do
       nil ->
@@ -47,7 +47,8 @@ defmodule ChatWeb.Storage do
 
         Repo.one!(query)
         |> Repo.delete!()
+
+        Repo.get!(Message, message.id) |> Repo.preload([:likes])
     end
   end
-
 end

@@ -1,6 +1,7 @@
 defmodule ChatWeb.ChatLiveTest do
   import Phoenix.LiveViewTest
   use ChatWeb.ConnCase
+  use Chat.RepoCase
 
   test "connected mount", %{conn: conn} do
     conn = get(conn, "/chat")
@@ -25,7 +26,7 @@ defmodule ChatWeb.ChatLiveTest do
   end
 
   test "chat box" do
-    assigns = [%{username: "test", message: "test", likes: [], id: "aaa"}]
+    assigns = [%{author_username: "test", text_body: "test", likes: [], id: "aaa"}]
 
     assert render_component(&ChatWeb.ChatBoxLive.chat_box/1, messages: assigns) =~
              "<p>test  :  test</p>"

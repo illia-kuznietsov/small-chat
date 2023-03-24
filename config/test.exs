@@ -7,6 +7,13 @@ config :chat, ChatWeb.Endpoint,
   secret_key_base: "sDhFzufI5czvnV9pKK27C2HHG+IWAJl/4pp+V6A8zbEyq3UACyNcRZ4ikBt2//EZ",
   server: false
 
+config :chat, Chat.Repo,
+  username: "postgres",
+  password: "postgres",
+  database: "chat_test",
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox
+
 # In test we don't send emails.
 # config :chat, Chat.Mailer,
 #  adapter: Swoosh.Adapters.Test

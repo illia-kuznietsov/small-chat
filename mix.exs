@@ -68,7 +68,8 @@ defmodule Chat.MixProject do
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
-      reset: ["ecto.drop", "ecto.create", "ecto.migrate"]
+      reset: ["ecto.drop", "ecto.create", "ecto.migrate"],
+      test: ["ecto.drop", "ecto.create --quiet", "ecto.migrate", "test"]
     ]
   end
 end
