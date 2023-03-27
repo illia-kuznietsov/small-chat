@@ -6,6 +6,12 @@ import Config
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
 # with esbuild to bundle .js and .css sources.
+config :chat, Chat.Repo,
+  database: "chat",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost"
+
 config :chat, ChatWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.

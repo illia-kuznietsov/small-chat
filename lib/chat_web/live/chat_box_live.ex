@@ -4,12 +4,17 @@ defmodule ChatWeb.ChatBoxLive do
 
   def chat_box(assigns) do
     ~H"""
-      <div id="chat-box">
         <%= for message <- @messages do%>
-          <p><%= message.username %>  :  <%= message.message %></p>
-          <button phx-click="like" phx-value-id={message.id} title={message.likes}><%= length(message.likes) %></button>
+          <div class="message">
+            <button phx-click="like" phx-value-id={message.id} title={format_likes(message.likes)}>&#x2764; <%= length(message.likes) %></button>
+            <p><%= message.author_username %>  :  <%= message.text_body %></p>
+          </div>
         <% end %>
-      </div>
+
     """
+  end
+
+  def format_likes(likes) do
+    likes |> Enum.map_join(", ", fn like -> like.username end)
   end
 end

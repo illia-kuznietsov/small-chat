@@ -48,6 +48,13 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
+  config :chat, Chat.Repo,
+    ssl: false,
+    socket_options: [:inet6],
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    url:
+      "postgres://digi_chat_digital_users:3g3dFVD8S0YbLRP@digi-chat-digital-users-db.flycast:5432/digi_chat_digital_users?sslmode=disable"
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key

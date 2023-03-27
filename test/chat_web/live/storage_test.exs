@@ -1,32 +1,25 @@
 defmodule ChatWeb.StorageTest do
   use ExUnit.Case, async: false
+  use Chat.RepoCase
+  alias ChatWeb.Storage
 
-  test "get_message_storage" do
-    assert is_list(ChatWeb.Storage.get_message_storage())
-  end
 
-  test "new message" do
-    ChatWeb.Message.create_message("testuser", "testmessage") |> ChatWeb.Storage.post_message()
-
-    assert Enum.any?(ChatWeb.Storage.get_message_storage(), fn message ->
-             message.username == "testuser"
-           end)
-  end
-
-  test "like, then dislike" do
-    ChatWeb.Message.create_message("testuser", "testmessage") |> ChatWeb.Storage.post_message()
-    [first | _] = ChatWeb.Storage.get_message_storage()
-
-    ChatWeb.Storage.update_message_likes(first.id, "blah")
-
-    assert Enum.any?(ChatWeb.Storage.get_message_storage(), fn message ->
-             "blah" in message.likes
-           end)
-
-    ChatWeb.Storage.update_message_likes(first.id, "blah")
-
-    assert Enum.any?(ChatWeb.Storage.get_message_storage(), fn message ->
-             "blah" not in message.likes
-           end)
+  test "saving user works, then posting a message, and checking if likes work" do
+    # saving our first (?) user
+    user = Storage.save_user("test_user_1")
+    assert user.username == "test_user_1"
+    # this user posts their first message
+    message = Storage.post_message("test message", user.id, user.username)
+    assert message.author == user
+    assert message.text_body == "test message"
+    # checking this message's likes being empty first
+    message = message |> Repo.preload(:likes)
+    assert message.likes == []
+    # user liked their own message!
+    message = Storage.update_message_likes(message.id, user.id)
+    assert message.likes != []
+    # user has changed their mind
+    message = Storage.update_message_likes(message.id, user.id)
+    assert message.likes == []
   end
 end

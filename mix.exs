@@ -41,6 +41,8 @@ defmodule Chat.MixProject do
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.7.2"},
       {:esbuild, "~> 0.5", runtime: Mix.env() == :dev},
+      {:ecto_sql, "~> 3.0"},
+      {:postgrex, ">= 0.0.0"},
       {:tailwind, "~> 0.1.8", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.3"},
       {:finch, "~> 0.13"},
@@ -65,7 +67,9 @@ defmodule Chat.MixProject do
       setup: ["deps.get", "assets.setup", "assets.build"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
-      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
+      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
+      reset: ["ecto.drop", "ecto.create", "ecto.migrate"],
+      test: ["ecto.drop", "ecto.create --quiet", "ecto.migrate", "test"]
     ]
   end
 end

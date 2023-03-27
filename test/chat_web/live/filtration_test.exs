@@ -1,72 +1,60 @@
 defmodule ChatWeb.FiltrationTest do
   use ExUnit.Case, async: false
+  use Chat.RepoCase
+  alias ChatWeb.{Storage, Filtration}
+  alias Chat.Message
 
   test "test filters" do
-    ChatWeb.Message.create_message("testuser", "testmessage") |> ChatWeb.Storage.post_message()
+    # create some users
+    user_1 = Storage.save_user("test_user_1")
+    user_2 = Storage.save_user("test_user_2")
+    user_3 = Storage.save_user("test_user_3")
 
-    ChatWeb.Message.create_message("testuser_v2", "testmessage2")
-    |> ChatWeb.Storage.post_message()
+    # users post their first messages
+    message_1 = Storage.post_message("hello all", user_1.id, user_1.username)
+    message_2 = Storage.post_message("hello, test_user_1!", user_2.id, user_2.username)
+    message_3 = Storage.post_message("hello indeed", user_3.id, user_3.username)
 
-    ChatWeb.Message.create_message("testuser_v3", "testmessage3")
-    |> ChatWeb.Storage.post_message()
+    #user_1 liked their message
+    ChatWeb.Storage.update_message_likes(message_1.id, user_1.id)
 
-    [first, second, third | _] = ChatWeb.Storage.get_message_storage()
+    # checking that filters got one liked message
+    [first_filtered | _] = Filtration.filter_messages("", %{"only-liked" => "on"})
+    assert first_filtered.text_body == "hello all"
 
-    ChatWeb.Storage.update_message_likes(first.id, "testuser")
-
-    # got one liked message
-    assert ChatWeb.Filtration.filter_messages("", %{"only-liked" => "on"}) ==
-             Enum.filter(
-               ChatWeb.Storage.get_message_storage(),
-               fn message -> message.likes != [] end
-             )
-
-    # testing if it has passed the text filter as well as the first checkbox filter
-    assert ChatWeb.Filtration.filter_messages("te", %{"only-liked" => "on"}) ==
-             Enum.filter(
-               ChatWeb.Storage.get_message_storage(),
-               fn message -> message.likes != [] and message.message =~ "te" end
-             )
+    # testing if it has not passed passed the text filter tho, despite passing the first checkbox filter
+    assert Filtration.filter_messages("te", %{"only-liked" => "on"}) == []
 
     # this way we are retracting the like
-    ChatWeb.Storage.update_message_likes(first.id, "testuser")
+    Storage.update_message_likes(message_1.id, user_1.id)
+
     # checking that this indeed happened
-    assert ChatWeb.Filtration.filter_messages("te", %{"only-liked" => "on"}) == []
+    assert Filtration.filter_messages("", %{"only-liked" => "on"}) == []
+
     # checking filtration with no filtration params
-    assert ChatWeb.Filtration.filter_messages("", %{"only-liked" => "off"}) ==
-             ChatWeb.Storage.get_message_storage()
+    assert Filtration.filter_messages("", %{}) == Repo.all(Message) |> Repo.preload([:likes])
 
     # checking only text filter
-    assert ChatWeb.Filtration.filter_messages("te", %{"only-liked" => "off"}) ==
-             Enum.filter(
-               ChatWeb.Storage.get_message_storage(),
-               fn message -> message.message =~ "te" end
-             )
+    [first_filtered | _] = Filtration.filter_messages("indeed", %{"only-liked" => "off"})
+    assert first_filtered.text_body == "hello indeed"
 
     # checking not implemented checkbox filters
-    assert ChatWeb.Filtration.filter_messages("", %{"not-implemented" => "on"}) ==
-             ChatWeb.Storage.get_message_storage()
+    assert ChatWeb.Filtration.filter_messages("", %{"not-implemented" => "on"}) == Repo.all(Message) |> Repo.preload([:likes])
 
     # checking second checkbox filter, where the messages have a like from a user that liked more than one message
-    ChatWeb.Storage.update_message_likes(first.id, "testuser")
-    ChatWeb.Storage.update_message_likes(second.id, "testuser")
+    ChatWeb.Storage.update_message_likes(message_1.id, user_1.id)
+    ChatWeb.Storage.update_message_likes(message_2.id, user_1.id)
     assert length(ChatWeb.Filtration.filter_messages("", %{"liked-by-likers" => "on"})) == 2
 
     # checking third checkbox filter, where the messages have no likes and come from users that didn't like anything
     [expected | _] = ChatWeb.Filtration.filter_messages("", %{"not-liked-by-nonlikers" => "on"})
-    assert expected.message == "testmessage3"
+    assert expected.text_body == "hello indeed"
+
     # checking the forth filter, where 80%+ of ALL likes belong to the least amount of messages
-    ChatWeb.Storage.update_message_likes(third.id, "testuser")
+    ChatWeb.Storage.update_message_likes(message_3.id, user_3.id)
 
     assert length(
              ChatWeb.Filtration.filter_messages("", %{"20-percent-minority-most-liked" => "on"})
            ) == 3
-
-    ChatWeb.Storage.update_message_likes(second.id, "testuser_v1")
-    ChatWeb.Storage.update_message_likes(third.id, "testuser_v1")
-
-    assert length(
-             ChatWeb.Filtration.filter_messages("", %{"20-percent-minority-most-liked" => "on"})
-           ) == 2
   end
 end

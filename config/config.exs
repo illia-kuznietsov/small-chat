@@ -7,6 +7,9 @@
 # General application configuration
 import Config
 
+config :chat,
+  ecto_repos: [Chat.Repo]
+
 # Configures the endpoint
 config :chat, ChatWeb.Endpoint,
   url: [host: "localhost"],
