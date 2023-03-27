@@ -15,6 +15,6 @@ defmodule ChatWeb.ChatBoxLive do
   end
 
   def format_likes(likes) do
-    likes |> Enum.map(fn like -> like.username end) |> Enum.join(", ")
+    likes |> Enum.map_join(", ", fn like -> like.username end)
   end
 end
